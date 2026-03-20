@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-import tensorflow as tf
+import onnxruntime as ort  # Removed TensorFlow, using lightweight ONNX
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 
@@ -15,16 +15,17 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 st.title("🌳 Ahmedabad 2035: Greenery Forecaster")
-st.subheader("Predicting urban vegetation using ConvLSTM Deep Learning")
+st.subheader("Predicting urban vegetation using ConvLSTM Deep Learning (Optimized)")
 
 # --- LOAD DATA & MODEL ---
 @st.cache_resource
 def load_assets():
-    model = tf.keras.models.load_model('convlstm_greenery_model.h5')
+    # Load the compressed ONNX model instead of the massive .h5 file
+    session = ort.InferenceSession('model.onnx')
     seed = np.load('seed_data.npy')
-    return model, seed
+    return session, seed
 
-model, seed_data = load_assets()
+session, seed_data = load_assets()
 
 # --- SIDEBAR ---
 with st.sidebar:
@@ -35,16 +36,18 @@ with st.sidebar:
 # --- PREDICTION LOGIC ---
 if predict_btn:
     with st.spinner(f"Simulating Ahmedabad in {2024 + years_to_jump}..."):
-        # This is a simplified version of your stitching logic
-        # For the app, we use the seed_data to predict the future frames
         
-        current_input = np.expand_dims(seed_data, axis=0) # (1, 5, H, W, 1)
+        # ONNX is very strict about data types, so we force float32
+        current_input = np.expand_dims(seed_data, axis=0).astype(np.float32) 
+        input_name = session.get_inputs()[0].name # Get the exact input name the model expects
         
         # Prediction loop
         for _ in range(years_to_jump):
-            pred = model.predict(current_input, verbose=0)
+            # The ONNX prediction command
+            pred = session.run(None, {input_name: current_input})[0]
             new_frame = np.expand_dims(pred, axis=1)
-            current_input = np.concatenate((current_input[:, 1:], new_frame), axis=1)
+            # Update the sliding window and ensure it stays float32
+            current_input = np.concatenate((current_input[:, 1:], new_frame), axis=1).astype(np.float32)
         
         final_ndvi = pred[0, :, :, 0]
 

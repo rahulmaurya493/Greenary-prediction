@@ -34,22 +34,40 @@ with st.sidebar:
     predict_btn = st.button("Generate Future Map", type="primary")
 
 # --- PREDICTION LOGIC ---
+import cv2 # Add this at the top
+
+# ... (UI and Load Assets code stay the same) ...
+
 if predict_btn:
     with st.spinner(f"Simulating Ahmedabad in {2024 + years_to_jump}..."):
         
-        # ONNX is very strict about data types, so we force float32
-        current_input = np.expand_dims(seed_data, axis=0).astype(np.float32) 
-        input_name = session.get_inputs()[0].name # Get the exact input name the model expects
+        # --- STEP 1: RESIZE INPUT TO 64x64 ---
+        # We resize each of the 5 years in the seed data
+        resized_seed = []
+        for i in range(5):
+            # Resize from 722x722 down to 64x64
+            img_64 = cv2.resize(seed_data[i, :, :, 0], (64, 64))
+            resized_seed.append(img_64)
         
-        # Prediction loop
+        current_input = np.array(resized_seed).astype(np.float32)
+        current_input = np.expand_dims(current_input, axis=(0, -1)) # Shape: (1, 5, 64, 64, 1)
+        
+        input_name = session.get_inputs()[0].name
+
+        # --- STEP 2: RUN PREDICTION ---
         for _ in range(years_to_jump):
-            # The ONNX prediction command
-            pred = session.run(None, {input_name: current_input})[0]
+            model_inputs = {input_name: current_input}
+            pred = session.run(None, model_inputs)[0]
             new_frame = np.expand_dims(pred, axis=1)
-            # Update the sliding window and ensure it stays float32
-            current_input = np.concatenate((current_input[:, 1:], new_frame), axis=1).astype(np.float32)
+            current_input = np.concatenate((current_input[:, 1:], new_frame), axis=1)
         
-        final_ndvi = pred[0, :, :, 0]
+        # --- STEP 3: RESIZE OUTPUT BACK TO ORIGINAL ---
+        # Get the 64x64 result
+        prediction_64 = pred[0, :, :, 0]
+        # Scale it back up to 722x722 so it looks detailed in the UI
+        final_ndvi = cv2.resize(prediction_64, (722, 722), interpolation=cv2.INTER_CUBIC)
+
+        # ... (rest of your classification and plotting code stays the same) ...
 
         # Classification
         classified = np.zeros_like(final_ndvi)

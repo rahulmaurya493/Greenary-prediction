@@ -326,7 +326,7 @@ def make_figures(ndvi: np.ndarray, classified: np.ndarray,
                     color="#81c784", fontsize=9)
     cbar1.ax.yaxis.set_tick_params(color="#81c784")
     plt.setp(cbar1.ax.yaxis.get_ticklabels(), color="#81c784", fontsize=8)
-    cbar1.outline.set_edgecolor("rgba(76,175,80,0.30)")
+    cbar1.outline.set_edgecolor((0.298, 0.686, 0.314, 0.30))
 
     fig1.tight_layout(pad=0.5)
 
@@ -350,7 +350,7 @@ def make_figures(ndvi: np.ndarray, classified: np.ndarray,
         fontsize=8.5,
         framealpha=0.35,
         facecolor="#0d2410",
-        edgecolor="rgba(76,175,80,0.30)",
+        edgecolor=(0.298, 0.686, 0.314, 0.30),
         labelcolor="#c8e6c9",
         title="Land Cover",
         title_fontsize=9,
@@ -381,8 +381,8 @@ def make_figures(ndvi: np.ndarray, classified: np.ndarray,
     ax3.spines[:].set_visible(False)
     ax3.xaxis.label.set_color("#81c784")
     for spine in ax3.spines.values():
-        spine.set_edgecolor("rgba(76,175,80,0.20)")
-    ax3.grid(axis="x", color="rgba(76,175,80,0.12)", linestyle="--", linewidth=0.7)
+        spine.set_edgecolor((0.298, 0.686, 0.314, 0.20))
+    ax3.grid(axis="x", color=(0.298, 0.686, 0.314, 0.12), linestyle="--", linewidth=0.7)
 
     fig3.tight_layout(pad=0.6)
 

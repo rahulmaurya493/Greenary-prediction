@@ -21,7 +21,7 @@ st.subheader("Predicting urban vegetation using ConvLSTM Deep Learning (Optimize
 @st.cache_resource
 def load_assets():
     # Load the compressed ONNX model instead of the massive .h5 file
-    session = ort.InferenceSession('model.onnx')
+    session = ort.InferenceSession('model_flexible.onnx')
     seed = np.load('seed_data.npy')
     return session, seed
 

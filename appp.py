@@ -568,7 +568,7 @@ if predict_btn:
             ⚠️ <strong style='color:rgba(255,224,130,0.90);'>Model Note:</strong>
             Predictions beyond 15 years compound iterative uncertainty. Treat long-range forecasts
             as indicative trajectories, not precise values. The model was trained on Ahmedabad
-            satellite data (2019–2024) and extrapolates vegetation patterns under stable conditions.
+            satellite data (2001–2024) and extrapolates vegetation patterns under stable conditions.
         </p>
     </div>
     """, unsafe_allow_html=True)
